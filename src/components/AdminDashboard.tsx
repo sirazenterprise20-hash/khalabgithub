@@ -18,7 +18,8 @@ import {
   Info,
   Lock,
   Shield,
-  Key
+  Key,
+  Globe
 } from "lucide-react";
 import { Product, Category, Catalog, Order, AppConfig, Promo, Banner } from "../types";
 
@@ -43,6 +44,11 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
   const [activeSubTab, setActiveSubTab] = useState<"products" | "categories" | "orders" | "design" | "push">("products");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Cloud Sync Server configuration state
+  const [apiBaseInput, setApiBaseInput] = useState(() => {
+    return localStorage.getItem("khalab_api_base") || "https://ais-pre-mlblprmea5x27qr4ihex5e-983253631521.asia-southeast1.run.app";
+  });
 
   // Secure Admin Login State
   const [isAdminAuthorized, setIsAdminAuthorized] = useState(() => {
@@ -719,6 +725,64 @@ export default function AdminDashboard({
             </span>
             <ChevronRight className="w-3 h-3 text-white/50" />
           </button>
+
+          {/* Cloud Synchronization Manager for external hosts like Netlify */}
+          <div className="pt-4 border-t border-gray-150 mt-4 space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-mono tracking-widest text-gray-400 uppercase font-extrabold flex items-center gap-1">
+                <Globe className="w-3.5 h-3.5 text-slate-800" />
+                Cloud API Sync
+              </span>
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Systems online"></span>
+            </div>
+            
+            <div className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-2.5">
+              <div className="text-[10px] text-slate-500 leading-relaxed">
+                App running on: <strong className="font-mono text-slate-900">{window.location.hostname || "localhost"}</strong>.<br />
+                For static hosts (like Netlify) communicating with our custom backend, sync configurations here:
+              </div>
+              
+              <div className="space-y-1">
+                <label className="block text-[8px] font-mono font-bold uppercase text-slate-500">
+                  Target API Base URL
+                </label>
+                <div className="flex gap-1">
+                  <input
+                    type="text"
+                    value={apiBaseInput}
+                    onChange={(e) => {
+                      setApiBaseInput(e.target.value);
+                      localStorage.setItem("khalab_api_base", e.target.value);
+                    }}
+                    placeholder="https://...run.app"
+                    className="w-full text-[10px] font-mono p-1.5 border border-slate-250 rounded bg-white shadow-3xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const defaultUrl = "https://ais-pre-mlblprmea5x27qr4ihex5e-983253631521.asia-southeast1.run.app";
+                      setApiBaseInput(defaultUrl);
+                      localStorage.setItem("khalab_api_base", defaultUrl);
+                      alert("Reset target Base URL successfully! Please click Reload below.");
+                    }}
+                    className="text-[9px] font-bold px-1.5 py-1 bg-slate-200 text-slate-800 rounded hover:bg-slate-350 cursor-pointer"
+                    title="Reset to default Cloud Run server"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.reload();
+                }}
+                className="w-full py-1.5 text-center bg-slate-900 hover:bg-slate-950 text-white text-[10px] font-bold rounded-lg cursor-pointer transition-all uppercase tracking-wider font-mono"
+              >
+                Apply & Sync
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Dynamic Detail Panel Workspace */}
