@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, MapPin, Truck, Check, HelpCircle, Phone, ArrowLeft, PackageCheck } from "lucide-react";
 import { Order, AppConfig } from "../types";
+import { apiFetch } from "../api";
 
 interface OrderTrackingProps {
   config: AppConfig;
@@ -22,7 +23,7 @@ export default function OrderTracking({ config, defaultOrderId, onBack }: OrderT
     setSearchError("");
     setOrder(null);
 
-    fetch(`/api/orders/track/${trackIdInput.trim().toUpperCase()}`)
+    apiFetch(`/api/orders/track/${trackIdInput.trim().toUpperCase()}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Invalid tracking ID. Order not found.");
@@ -44,7 +45,7 @@ export default function OrderTracking({ config, defaultOrderId, onBack }: OrderT
     if (defaultOrderId) {
       setTrackIdInput(defaultOrderId);
       setLoading(true);
-      fetch(`/api/orders/track/${defaultOrderId}`)
+      apiFetch(`/api/orders/track/${defaultOrderId}`)
         .then((res) => {
           if (!res.ok) {
             throw new Error("Invalid tracking ID");

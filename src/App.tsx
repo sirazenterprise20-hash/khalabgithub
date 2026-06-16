@@ -22,6 +22,7 @@ import {
   Copy
 } from "lucide-react";
 import { Product, Category, Catalog, Order, AppConfig, PushNotification } from "./types";
+import { apiFetch } from "./api";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminDashboard from "./components/AdminDashboard";
@@ -89,37 +90,37 @@ export default function App() {
   // Fetch initial collections
   const loadSystemData = () => {
     // Configuration
-    fetch("/api/config")
+    apiFetch("/api/config")
       .then((res) => res.json())
       .then((data) => setConfig(data))
       .catch((err) => console.error("Config fetch detail failure:", err));
 
     // Products
-    fetch("/api/products")
+    apiFetch("/api/products")
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => console.error("Products fetch failure:", err));
 
     // Categories
-    fetch("/api/categories")
+    apiFetch("/api/categories")
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((err) => console.error("Categories fetch failure:", err));
 
     // Catalogs
-    fetch("/api/catalogs")
+    apiFetch("/api/catalogs")
       .then((res) => res.json())
       .then((data) => setCatalogs(data))
       .catch((err) => console.error("Catalogs fetch failure:", err));
 
     // Orders
-    fetch("/api/orders")
+    apiFetch("/api/orders")
       .then((res) => res.json())
       .then((data) => setOrders(data))
       .catch((err) => console.error("Orders fetch failure:", err));
 
     // Notifications
-    fetch("/api/notifications")
+    apiFetch("/api/notifications")
       .then((res) => res.json())
       .then((data) => setNotifications(data))
       .catch((err) => console.error("Notifications fetch detail failure:", err));
@@ -236,7 +237,7 @@ export default function App() {
   // Config modifier
   const handleConfigUpdate = async (updatedConfig: AppConfig) => {
     try {
-      const res = await fetch("/api/config", {
+      const res = await apiFetch("/api/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedConfig)

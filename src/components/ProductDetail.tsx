@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Star, MessageSquare, Video, ArrowLeft, ShoppingCart, User, PlusCircle, Check, Info } from "lucide-react";
 import { Product, Review } from "../types";
+import { apiFetch } from "../api";
 import ProductCard from "./ProductCard";
 
 interface ProductDetailProps {
@@ -34,7 +35,7 @@ export default function ProductDetail({
   // Load reviews and recommended products
   useEffect(() => {
     // 1. Fetch Reviews
-    fetch(`/api/reviews?productId=${product.id}`)
+    apiFetch(`/api/reviews?productId=${product.id}`)
       .then((res) => {
         if (res.ok) return res.json();
         return [];
@@ -60,7 +61,7 @@ export default function ProductDetail({
     }
 
     // Fetch recommendations based on this history
-    fetch(`/api/products?recommendations=true&history=${encodeURIComponent(JSON.stringify(history))}`)
+    apiFetch(`/api/products?recommendations=true&history=${encodeURIComponent(JSON.stringify(history))}`)
       .then((res) => {
         if (res.ok) return res.json();
         return [];
@@ -80,7 +81,7 @@ export default function ProductDetail({
     if (!reviewName || !reviewComment) return;
 
     try {
-      const response = await fetch("/api/reviews", {
+      const response = await apiFetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

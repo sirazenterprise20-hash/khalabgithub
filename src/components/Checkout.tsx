@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { CreditCard, CheckCircle2, Copy, Percent, ShoppingBag, ArrowRight, ShieldCheck, HelpCircle } from "lucide-react";
 import { OrderItem, Promo } from "../types";
+import { apiFetch } from "../api";
 import { autoSignInAndRegisterByPhone, storeOrderInFirestore } from "../firebase";
 
 interface CheckoutProps {
@@ -148,7 +149,7 @@ export default function Checkout({
     };
 
     try {
-      const response = await fetch("/api/orders", {
+      const response = await apiFetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderObj)

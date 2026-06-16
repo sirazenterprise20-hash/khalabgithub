@@ -22,6 +22,7 @@ import {
   Globe
 } from "lucide-react";
 import { Product, Category, Catalog, Order, AppConfig, Promo, Banner } from "../types";
+import { apiFetch } from "../api";
 
 interface AdminDashboardProps {
   config: AppConfig;
@@ -175,7 +176,7 @@ export default function AdminDashboard({
         const base64Data = reader.result as string;
         
         // Post base64 payload to local server
-        const response = await fetch("/api/upload", {
+        const response = await apiFetch("/api/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -217,7 +218,7 @@ export default function AdminDashboard({
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64Data = reader.result as string;
-        const response = await fetch("/api/upload", {
+        const response = await apiFetch("/api/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -292,7 +293,7 @@ export default function AdminDashboard({
       const url = editingProduct ? `/api/products/${editingProduct.id}` : "/api/products";
       const method = editingProduct ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      const res = await apiFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -319,7 +320,7 @@ export default function AdminDashboard({
     }
 
     try {
-      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/products/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDeleteConfirmId(null);
         onRefreshData();
@@ -334,7 +335,7 @@ export default function AdminDashboard({
     e.preventDefault();
     if (!newCatName) return;
     try {
-      const res = await fetch("/api/categories", {
+      const res = await apiFetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newCatName, description: newCatDesc })
@@ -356,7 +357,7 @@ export default function AdminDashboard({
     e.preventDefault();
     if (!newCatalogName) return;
     try {
-      const res = await fetch("/api/catalogs", {
+      const res = await apiFetch("/api/catalogs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newCatalogName, subtitle: newCatalogSubtitle })
@@ -400,7 +401,7 @@ export default function AdminDashboard({
   // Handle order delivery status
   const handleUpdateOrderStatus = async (id: string, status: string) => {
     try {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await apiFetch(`/api/orders/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderStatus: status })
@@ -415,7 +416,7 @@ export default function AdminDashboard({
 
   const handleToggleOrderFraud = async (id: string, currentAlert: boolean) => {
     try {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await apiFetch(`/api/orders/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fraudAlert: !currentAlert })
@@ -467,7 +468,7 @@ export default function AdminDashboard({
     if (!pushTitle || !pushMessage) return;
 
     try {
-      const res = await fetch("/api/notifications/push", {
+      const res = await apiFetch("/api/notifications/push", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: pushTitle, message: pushMessage })
