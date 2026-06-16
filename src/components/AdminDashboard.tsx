@@ -339,12 +339,18 @@ export default function AdminDashboard({
   // Add category & Catalog collections
   const handleAddCategorySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCatName) return;
+    const catNameStr = newCatName.trim();
+    const catDescStr = newCatDesc.trim();
+    if (!catNameStr) {
+      alert("Category name cannot be empty.");
+      return;
+    }
     try {
+      console.log(`[Category Create] Sending to API: Name=${catNameStr}, Description=${catDescStr}`);
       const res = await apiFetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newCatName, description: newCatDesc })
+        body: JSON.stringify({ name: catNameStr, description: catDescStr })
       });
       if (res.ok) {
         setNewCatName("");
@@ -367,19 +373,25 @@ export default function AdminDashboard({
 
   const handleAddCatalogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCatalogName) return;
+    const nameStr = newCatalogName.trim();
+    const subtitleStr = newCatalogSubtitle.trim();
+    if (!nameStr) {
+      alert("Catalog title cannot be empty.");
+      return;
+    }
     try {
+      console.log(`[Catalog Create] Sending to API: Name=${nameStr}, Subtitle=${subtitleStr}`);
       const res = await apiFetch("/api/catalogs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newCatalogName, subtitle: newCatalogSubtitle })
+        body: JSON.stringify({ name: nameStr, subtitle: subtitleStr })
       });
       if (res.ok) {
         setNewCatalogName("");
         setNewCatalogSubtitle("");
         onRefreshData();
       } else {
-        let errorMsg = "Error adding catalog";
+        let errorMsg = "Error adding catalog Collection";
         try {
           const d = await res.json();
           errorMsg = d.error || errorMsg;

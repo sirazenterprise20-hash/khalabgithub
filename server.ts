@@ -260,11 +260,11 @@ app.post("/api/config", (req, res) => {
 });
 
 // 2. Catalogs & Categories
-app.get("/api/categories", (req, res) => {
+app.get(["/api/categories", "/api/category"], (req, res) => {
   res.json(state.categories);
 });
 
-app.post("/api/categories", (req, res) => {
+app.post(["/api/categories", "/api/category"], (req, res) => {
   try {
     const { name, description } = req.body;
     if (!name) return res.status(400).json({ error: "Category name is required" });
@@ -286,11 +286,11 @@ app.post("/api/categories", (req, res) => {
   }
 });
 
-app.get("/api/catalogs", (req, res) => {
+app.get(["/api/catalogs", "/api/catalog"], (req, res) => {
   res.json(state.catalogs);
 });
 
-app.post("/api/catalogs", (req, res) => {
+app.post(["/api/catalogs", "/api/catalog"], (req, res) => {
   try {
     const { name, subtitle } = req.body;
     if (!name) return res.status(400).json({ error: "Catalog name is required" });
