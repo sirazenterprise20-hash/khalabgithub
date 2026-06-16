@@ -19,14 +19,42 @@ import {
   getDocs 
 } from "firebase/firestore";
 
+// Safe helper to dynamically retrieve environment variables across environments (Vite or Process)
+// without throwing "ReferenceError: process is not defined" in the browser.
+function getEnvValue(key: string): string | undefined {
+  try {
+    const metaCast = import.meta as any;
+    if (typeof import.meta !== "undefined" && metaCast && metaCast.env) {
+      if (metaCast.env[key]) return metaCast.env[key];
+      if (metaCast.env[`VITE_${key}`]) return metaCast.env[`VITE_${key}`];
+      if (metaCast.env[`NEXT_PUBLIC_${key}`]) return metaCast.env[`NEXT_PUBLIC_${key}`];
+    }
+  } catch (e) {
+    // Ignore meta access issues if any
+  }
+
+  try {
+    const processCast = (typeof process !== "undefined" ? process : undefined) as any;
+    if (processCast && processCast.env) {
+      if (processCast.env[key]) return processCast.env[key];
+      if (processCast.env[`VITE_${key}`]) return processCast.env[`VITE_${key}`];
+      if (processCast.env[`NEXT_PUBLIC_${key}`]) return processCast.env[`NEXT_PUBLIC_${key}`];
+    }
+  } catch (e) {
+    // Ignore process access issues if any
+  }
+
+  return undefined;
+}
+
 // The Web App's Firebase configuration provided by the user
 const firebaseConfig = {
-  apiKey: "AIzaSyAUKXbdTbx138JmZUk1oR34Lt9vkabm7YI",
-  authDomain: "testkhalab.firebaseapp.com",
-  projectId: "testkhalab",
-  storageBucket: "testkhalab.firebasestorage.app",
-  messagingSenderId: "779766922472",
-  appId: "1:779766922472:web:8622d61456a404ba375d5d"
+  apiKey: getEnvValue("FIREBASE_API_KEY") || "AIzaSyAUKXbdTbx138JmZUk1oR34Lt9vkabm7YI",
+  authDomain: getEnvValue("FIREBASE_AUTH_DOMAIN") || "testkhalab.firebaseapp.com",
+  projectId: getEnvValue("FIREBASE_PROJECT_ID") || "testkhalab",
+  storageBucket: getEnvValue("FIREBASE_STORAGE_BUCKET") || "testkhalab.firebasestorage.app",
+  messagingSenderId: getEnvValue("FIREBASE_MESSAGING_SENDER_ID") || "779766922472",
+  appId: getEnvValue("FIREBASE_APP_ID") || "1:779766922472:web:8622d61456a404ba375d5d"
 };
 
 // Initialize Firebase
