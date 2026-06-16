@@ -1,22 +1,21 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import cors from "cors";
 import { createServer as createViteServer } from "vite";
 import { Product, Category, Catalog, Review, Order, AppConfig, PushNotification } from "./src/types.js";
 
 const app = express();
 const PORT = 3000;
 
-// Enable CORS for cross-origin requests (e.g. from Netlify)
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
+// Enable robust CORS support for all endpoints
+app.use(cors({
+  origin: "*",
+  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization,X-Requested-With,Accept,Origin",
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
 
 // High payload size for base64 photo/video uploads
 app.use(express.json({ limit: "50mb" }));

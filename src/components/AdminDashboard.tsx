@@ -304,11 +304,17 @@ export default function AdminDashboard({
         setEditingProduct(null);
         onRefreshData();
       } else {
-        const data = await res.json();
-        alert(data.error || "Save error encountered");
+        let errorMsg = "Save error encountered";
+        try {
+          const data = await res.json();
+          errorMsg = data.error || errorMsg;
+        } catch {
+          errorMsg = `Save error encountered (Status: ${res.status})`;
+        }
+        alert(errorMsg);
       }
-    } catch {
-      alert("Could not process product sync");
+    } catch (err: any) {
+      alert(`Could not process product sync: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -325,8 +331,8 @@ export default function AdminDashboard({
         setDeleteConfirmId(null);
         onRefreshData();
       }
-    } catch {
-      alert("Network deletion failure");
+    } catch (err: any) {
+      alert(`Network deletion failure: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -345,11 +351,17 @@ export default function AdminDashboard({
         setNewCatDesc("");
         onRefreshData();
       } else {
-        const d = await res.json();
-        alert(d.error || "Error adding category");
+        let errorMsg = "Error adding category";
+        try {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        } catch {
+          errorMsg = `Error adding category (Status: ${res.status})`;
+        }
+        alert(errorMsg);
       }
-    } catch {
-      alert("Network error.");
+    } catch (err: any) {
+      alert(`Network error: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
@@ -367,11 +379,17 @@ export default function AdminDashboard({
         setNewCatalogSubtitle("");
         onRefreshData();
       } else {
-        const d = await res.json();
-        alert(d.error || "Error adding catalog");
+        let errorMsg = "Error adding catalog";
+        try {
+          const d = await res.json();
+          errorMsg = d.error || errorMsg;
+        } catch {
+          errorMsg = `Error adding catalog (Status: ${res.status})`;
+        }
+        alert(errorMsg);
       }
-    } catch {
-      alert("Network error.");
+    } catch (err: any) {
+      alert(`Network error: ${err instanceof Error ? err.message : String(err)}`);
     }
   };
 
