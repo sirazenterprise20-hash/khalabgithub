@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account registration representing buyer accounts identified by phone number",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "The full name of the registered customer"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The primary mobile number format of the customer"
+        },
+        "address": {
+          "type": "string",
+          "description": "Standard delivery address details in Bangladesh"
+        },
+        "city": {
+          "type": "string",
+          "description": "The target delivery city inside Bangladesh"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when this user was registered"
+        }
+      },
+      "required": ["fullName", "phoneNumber", "address", "city"]
+    },
+    "Order": {
+      "title": "Customer Order",
+      "description": "Order submitted by the client, tracking payment, items, and shipping status",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Standard tracking ID starting with ORD-"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "The checkout customer full name"
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Unique contact number"
+        },
+        "customerAddress": {
+          "type": "string",
+          "description": "Delivery address"
+        },
+        "customerCity": {
+          "type": "string",
+          "description": "Selected city"
+        },
+        "items": {
+          "type": "array",
+          "description": "All order items allocated within bag"
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total checkout price"
+        },
+        "discountAmount": {
+          "type": "number",
+          "description": "Promo coupon discount value"
+        },
+        "promoApplied": {
+          "type": "string",
+          "description": "The promo coupon code applied if any"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "COD, Card or bKash / Nagad / Rocket wallets"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Paid, Pending or Failed"
+        },
+        "orderStatus": {
+          "type": "string",
+          "description": "Pending, Processing, Shipped, Delivered or Cancelled"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the order was registered"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID associated with the auto-signed-in user"
+        }
+      },
+      "required": ["id", "customerName", "customerPhone", "customerAddress", "customerCity", "items", "totalAmount"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Provides customer authentication account records mapped to their phone UIDs"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Individual order entities made by customers"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "KHALAB",
+  "description": "Full-stack premium e-commerce clothing store with real-time inventory, secure Bangladesh payment systems, smart recommendations, order tracking, and a powerful admin control center with anti-fraud analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
