@@ -136,6 +136,7 @@ export default function AdminDashboard({
   const [selectedTheme, setSelectedTheme] = useState<"crimson" | "emerald" | "amber" | "slate" | "violet" | "custom">(config.themeMode || "slate");
   const [customPrimary, setCustomPrimary] = useState(config.customPrimary || "");
   const [customSecondary, setCustomSecondary] = useState(config.customSecondary || "");
+  const [cfgBanners, setCfgBanners] = useState<Banner[]>(config.banners || []);
 
   // Update Config when prop shifts
   useEffect(() => {
@@ -150,6 +151,7 @@ export default function AdminDashboard({
     setSelectedTheme(config.themeMode || "slate");
     setCustomPrimary(config.customPrimary || "");
     setCustomSecondary(config.customSecondary || "");
+    setCfgBanners(config.banners || []);
   }, [config]);
 
   // Sync Categories & Catalog selects on adding/rendering
@@ -235,6 +237,71 @@ export default function AdminDashboard({
     } catch {
       alert("Failed to upload brand logo.");
     }
+  };
+
+  // Upload custom photo for individual banner slide
+  const handleBannerPhotoUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Data = reader.result as string;
+        const response = await apiFetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            base64Data
+          })
+        });
+        const data = await response.json();
+        if (response.ok && data.url) {
+          const updatedBanners = [...cfgBanners];
+          updatedBanners[index] = {
+            ...updatedBanners[index],
+            imageUrl: data.url
+          };
+          setCfgBanners(updatedBanners);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      alert("Failed to upload banner slide photo.");
+    }
+  };
+
+  // Add new blank banner slide
+  const handleAddBannerSlide = () => {
+    const newSlide: Banner = {
+      id: `b_${Date.now()}`,
+      imageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=1200",
+      title: "NEW CAMPAIGN ARRIVAL",
+      subtitle: "Discover our newly curated collection now",
+      link: "#shop"
+    };
+    setCfgBanners([...cfgBanners, newSlide]);
+  };
+
+  // Remove individual banner slide
+  const handleRemoveBannerSlide = (indexToKill: number) => {
+    if (cfgBanners.length <= 1) {
+      alert("At least one hero banner slide is required.");
+      return;
+    }
+    const updated = cfgBanners.filter((_, idx) => idx !== indexToKill);
+    setCfgBanners(updated);
+  };
+
+  // Update specific banner text property
+  const handleUpdateBannerProperty = (index: number, key: keyof Banner, value: string) => {
+    const updated = [...cfgBanners];
+    updated[index] = {
+      ...updated[index],
+      [key]: value
+    } as any;
+    setCfgBanners(updated);
   };
 
   // Switch edited elements
@@ -349,7 +416,10 @@ export default function AdminDashboard({
       console.log(`[Category Create] Sending to API: Name=${catNameStr}, Description=${catDescStr}`);
       const res = await apiFetch("/api/categories", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ name: catNameStr, description: catDescStr })
       });
       if (res.ok) {
@@ -383,7 +453,10 @@ export default function AdminDashboard({
       console.log(`[Catalog Create] Sending to API: Name=${nameStr}, Subtitle=${subtitleStr}`);
       const res = await apiFetch("/api/catalogs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ name: nameStr, subtitle: subtitleStr })
       });
       if (res.ok) {
@@ -417,7 +490,7 @@ export default function AdminDashboard({
       instagram: cfgInstagram,
       facebook: cfgFacebook,
       logoUrl: cfgLogo,
-      banners: config.banners,
+      banners: cfgBanners,
       promos: config.promos,
       themeMode: selectedTheme,
       customPrimary: selectedTheme === "custom" ? customPrimary : config.customPrimary,
@@ -1669,6 +1742,146 @@ export default function AdminDashboard({
                         <CheckCircle className="w-3.5 h-3.5" /> Logo Path: {cfgLogo}
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* Hero Banner Slides Customizer */}
+                <div className="p-6 bg-gray-50/40 rounded-2xl border border-gray-150 space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b">
+                    <div>
+                      <h5 className="font-bold text-sm text-gray-950 flex items-center gap-1.5">
+                        <Sparkles className="w-4.5 h-4.5 text-[var(--primary)]" />
+                        Hero Banner Photo & Caption Slides
+                      </h5>
+                      <p className="text-[11px] text-gray-550">Customize the interactive slide carousel shown on your store's front page.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddBannerSlide}
+                      className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-[10px] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Custom Slide
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    {cfgBanners.map((banner, index) => (
+                      <div key={banner.id} className="p-5 bg-white rounded-xl border border-gray-200 relative space-y-4">
+                        {/* Upper Header Control Row */}
+                        <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                          <span className="text-[11px] font-bold font-mono text-gray-450 uppercase">Slide #{index + 1}</span>
+                          {cfgBanners.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBannerSlide(index)}
+                              className="p-1 px-2.5 bg-red-50 text-red-650 hover:bg-red-100 duration-200 text-[10px] font-bold rounded flex items-center gap-1 cursor-pointer"
+                              title="Delete Slide"
+                            >
+                              <Trash className="w-3.5 h-3.5" />
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Slide Customizer Content: Inputs & Preview */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                          {/* Inputs Left (7 Cols) */}
+                          <div className="lg:col-span-7 space-y-3">
+                            <div>
+                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Slide Title (Primary Heading)</label>
+                              <input
+                                type="text"
+                                required
+                                value={banner.title}
+                                onChange={(e) => handleUpdateBannerProperty(index, "title", e.target.value)}
+                                placeholder="e.g. PREMIUM WINTER LAUNCH"
+                                className="w-full p-2 border bg-gray-50/50 rounded-lg text-xs font-bold text-gray-900"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Slide Subtitle (Description Caption)</label>
+                              <textarea
+                                value={banner.subtitle}
+                                onChange={(e) => handleUpdateBannerProperty(index, "subtitle", e.target.value)}
+                                placeholder="e.g. Elegant styles customized with love..."
+                                rows={2}
+                                className="w-full p-2 border bg-gray-50/50 rounded-lg text-xs text-gray-800 resize-none"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Redirection Link / Hash</label>
+                                <input
+                                  type="text"
+                                  value={banner.link}
+                                  onChange={(e) => handleUpdateBannerProperty(index, "link", e.target.value)}
+                                  placeholder="e.g. #shop, #category/Shirts"
+                                  className="w-full p-2 border bg-gray-50/50 rounded-lg text-xs font-mono"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Upload Photo</label>
+                                <input
+                                  type="file"
+                                  onChange={(e) => handleBannerPhotoUpload(index, e)}
+                                  className="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:bg-gray-100 file:border-0 file:text-[9px] file:font-semibold w-full mt-1"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Or Paste Direct Image URL</label>
+                              <input
+                                type="text"
+                                value={banner.imageUrl}
+                                onChange={(e) => handleUpdateBannerProperty(index, "imageUrl", e.target.value)}
+                                placeholder="https://images.unsplash.com/photo-..."
+                                className="w-full p-2 border bg-gray-50/50 rounded-lg text-[11px] font-mono"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Mini Overlay Preview Right (5 Cols) */}
+                          <div className="lg:col-span-5 flex flex-col justify-between">
+                            <span className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1.5 flex items-center gap-1">
+                              <Eye className="w-3.5 h-3.5 text-gray-400" />
+                              Live Miniature Carousel Preview
+                            </span>
+                            <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-950 border group shadow-sm flex items-center justify-center">
+                              {banner.imageUrl ? (
+                                <img
+                                  src={banner.imageUrl}
+                                  alt={banner.title}
+                                  referrerPolicy="no-referrer"
+                                  className="absolute inset-0 w-full h-full object-cover opacity-80"
+                                />
+                              ) : (
+                                <span className="text-white/30 text-[10px] font-mono font-bold">No photo added yet</span>
+                              )}
+                              
+                              {/* Dark filter overlay */}
+                              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end text-left min-h-[70%]">
+                                <h6 className="text-[10px] font-black tracking-tight text-white uppercase truncate line-clamp-1">
+                                  {banner.title || "UNTITLED LAUNCH"}
+                                </h6>
+                                <p className="text-[8px] text-white/80 leading-tight mt-0.5 max-w-[95%] line-clamp-2">
+                                  {banner.subtitle || "Customize this slide subtitle caption..."}
+                                </p>
+                                {banner.link && (
+                                  <span className="mt-2 text-[7px] font-extrabold uppercase tracking-wider text-pink-450 self-start border border-pink-400/50 px-1 py-0.5 rounded">
+                                    Link: {banner.link}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
