@@ -510,23 +510,8 @@ export default function AdminDashboard({
     };
 
     try {
-      const response = await apiFetch("/api/config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(updated)
-      });
-
-      if (response.ok) {
-        onConfigChange(updated);
-        alert("Hero Banner slides and campaigns saved successfully!");
-        onRefreshData();
-      } else {
-        const txt = await response.text();
-        alert(`Failed to save: ${txt}`);
-      }
+      await onConfigChange(updated);
+      alert("Hero Banner slides and campaigns saved successfully!");
     } catch (err: any) {
       alert(`Network error: ${err instanceof Error ? err.message : String(err)}`);
     }
