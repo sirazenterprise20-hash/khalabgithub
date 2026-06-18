@@ -8,10 +8,13 @@ import { Product, Category, Catalog, Review, Order, AppConfig, PushNotification 
 const app = express();
 const PORT = 3000;
 
-// Robust CORS & OPTIONS handler for all endpoints including wildcard netlify.app subdomains and explicit origins
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
+// Robust CORS & OPTIONS handler using standard node 'cors' package
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
     const lowerOrigin = origin.toLowerCase();
     const isAllowed = 
       lowerOrigin === "https://exquisite-raindrop-fd6fd6.netlify.app" ||
@@ -19,27 +22,23 @@ app.use((req, res, next) => {
       lowerOrigin.includes("localhost") ||
       lowerOrigin.includes("127.0.0.1") ||
       lowerOrigin.includes(".run.app");
-      
+
     if (isAllowed) {
-      res.setHeader("Access-Control-Allow-Origin", origin);
-      res.setHeader("Access-Control-Allow-Credentials", "true");
+      callback(null, true);
     } else {
-      res.setHeader("Access-Control-Allow-Origin", origin);
-      res.setHeader("Access-Control-Allow-Credentials", "true");
+      // Direct pass-through of origin to avoid strict blocking if they use other preview/custom domains
+      callback(null, true);
     }
-  } else {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-  }
-  
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
-  res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours preflight cache
-  
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  optionsSuccessStatus: 200,
+  maxAge: 86400
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // High payload size for base64 photo/video uploads
 app.use(express.json({ limit: "50mb" }));
