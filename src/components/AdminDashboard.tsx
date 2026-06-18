@@ -43,7 +43,7 @@ export default function AdminDashboard({
   onConfigChange,
   onRefreshData
 }: AdminDashboardProps) {
-  const [activeSubTab, setActiveSubTab] = useState<"products" | "categories" | "orders" | "design" | "push">("products");
+  const [activeSubTab, setActiveSubTab] = useState<"products" | "categories" | "orders" | "design" | "push" | "banner">("products");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   // Cloud Sync Server configuration state
@@ -501,6 +501,37 @@ export default function AdminDashboard({
     alert("Configuration & Professional style saved successfully!");
   };
 
+  // Submit Hero Banner configurations independently
+  const handleSaveBanners = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const updated: AppConfig = {
+      ...config,
+      banners: cfgBanners
+    };
+
+    try {
+      const response = await apiFetch("/api/config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(updated)
+      });
+
+      if (response.ok) {
+        onConfigChange(updated);
+        alert("Hero Banner slides and campaigns saved successfully!");
+        onRefreshData();
+      } else {
+        const txt = await response.text();
+        alert(`Failed to save: ${txt}`);
+      }
+    } catch (err: any) {
+      alert(`Network error: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
   // Handle order delivery status
   const handleUpdateOrderStatus = async (id: string, status: string) => {
     try {
@@ -811,6 +842,21 @@ export default function AdminDashboard({
             <span className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
               Store Setting & Professional Colors
+            </span>
+            <ChevronRight className="w-3 h-3 text-white/50" />
+          </button>
+
+          <button
+            onClick={() => setActiveSubTab("banner")}
+            className={`w-full py-2.5 px-3.5 text-left rounded-lg text-xs font-semibold flex items-center justify-between cursor-pointer transition-colors ${
+              activeSubTab === "banner"
+                ? "bg-[var(--primary)] text-white shadow-xs"
+                : "text-gray-700 hover:bg-gray-50 hover:text-gray-950"
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Customize Hero Banner
             </span>
             <ChevronRight className="w-3 h-3 text-white/50" />
           </button>
@@ -1745,146 +1791,6 @@ export default function AdminDashboard({
                   </div>
                 </div>
 
-                {/* Hero Banner Slides Customizer */}
-                <div className="p-6 bg-gray-50/40 rounded-2xl border border-gray-150 space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b">
-                    <div>
-                      <h5 className="font-bold text-sm text-gray-950 flex items-center gap-1.5">
-                        <Sparkles className="w-4.5 h-4.5 text-[var(--primary)]" />
-                        Hero Banner Photo & Caption Slides
-                      </h5>
-                      <p className="text-[11px] text-gray-550">Customize the interactive slide carousel shown on your store's front page.</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAddBannerSlide}
-                      className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-[10px] font-bold hover:bg-gray-800 transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Custom Slide
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-6">
-                    {cfgBanners.map((banner, index) => (
-                      <div key={banner.id} className="p-5 bg-white rounded-xl border border-gray-200 relative space-y-4">
-                        {/* Upper Header Control Row */}
-                        <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                          <span className="text-[11px] font-bold font-mono text-gray-450 uppercase">Slide #{index + 1}</span>
-                          {cfgBanners.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveBannerSlide(index)}
-                              className="p-1 px-2.5 bg-red-50 text-red-650 hover:bg-red-100 duration-200 text-[10px] font-bold rounded flex items-center gap-1 cursor-pointer"
-                              title="Delete Slide"
-                            >
-                              <Trash className="w-3.5 h-3.5" />
-                              Remove
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Slide Customizer Content: Inputs & Preview */}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                          {/* Inputs Left (7 Cols) */}
-                          <div className="lg:col-span-7 space-y-3">
-                            <div>
-                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Slide Title (Primary Heading)</label>
-                              <input
-                                type="text"
-                                required
-                                value={banner.title}
-                                onChange={(e) => handleUpdateBannerProperty(index, "title", e.target.value)}
-                                placeholder="e.g. PREMIUM WINTER LAUNCH"
-                                className="w-full p-2 border bg-gray-50/50 rounded-lg text-xs font-bold text-gray-900"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Slide Subtitle (Description Caption)</label>
-                              <textarea
-                                value={banner.subtitle}
-                                onChange={(e) => handleUpdateBannerProperty(index, "subtitle", e.target.value)}
-                                placeholder="e.g. Elegant styles customized with love..."
-                                rows={2}
-                                className="w-full p-2 border bg-gray-50/50 rounded-lg text-xs text-gray-800 resize-none"
-                              />
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Redirection Link / Hash</label>
-                                <input
-                                  type="text"
-                                  value={banner.link}
-                                  onChange={(e) => handleUpdateBannerProperty(index, "link", e.target.value)}
-                                  placeholder="e.g. #shop, #category/Shirts"
-                                  className="w-full p-2 border bg-gray-50/50 rounded-lg text-xs font-mono"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Upload Photo</label>
-                                <input
-                                  type="file"
-                                  onChange={(e) => handleBannerPhotoUpload(index, e)}
-                                  className="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:bg-gray-100 file:border-0 file:text-[9px] file:font-semibold w-full mt-1"
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Or Paste Direct Image URL</label>
-                              <input
-                                type="text"
-                                value={banner.imageUrl}
-                                onChange={(e) => handleUpdateBannerProperty(index, "imageUrl", e.target.value)}
-                                placeholder="https://images.unsplash.com/photo-..."
-                                className="w-full p-2 border bg-gray-50/50 rounded-lg text-[11px] font-mono"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Mini Overlay Preview Right (5 Cols) */}
-                          <div className="lg:col-span-5 flex flex-col justify-between">
-                            <span className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1.5 flex items-center gap-1">
-                              <Eye className="w-3.5 h-3.5 text-gray-400" />
-                              Live Miniature Carousel Preview
-                            </span>
-                            <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-950 border group shadow-sm flex items-center justify-center">
-                              {banner.imageUrl ? (
-                                <img
-                                  src={banner.imageUrl}
-                                  alt={banner.title}
-                                  referrerPolicy="no-referrer"
-                                  className="absolute inset-0 w-full h-full object-cover opacity-80"
-                                />
-                              ) : (
-                                <span className="text-white/30 text-[10px] font-mono font-bold">No photo added yet</span>
-                              )}
-                              
-                              {/* Dark filter overlay */}
-                              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end text-left min-h-[70%]">
-                                <h6 className="text-[10px] font-black tracking-tight text-white uppercase truncate line-clamp-1">
-                                  {banner.title || "UNTITLED LAUNCH"}
-                                </h6>
-                                <p className="text-[8px] text-white/80 leading-tight mt-0.5 max-w-[95%] line-clamp-2">
-                                  {banner.subtitle || "Customize this slide subtitle caption..."}
-                                </p>
-                                {banner.link && (
-                                  <span className="mt-2 text-[7px] font-extrabold uppercase tracking-wider text-pink-450 self-start border border-pink-400/50 px-1 py-0.5 rounded">
-                                    Link: {banner.link}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 <div className="flex justify-end pt-2 border-t border-gray-100">
                   <button
                     type="submit"
@@ -1966,6 +1872,165 @@ export default function AdminDashboard({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Sub Tab: Hero Banner Customizer */}
+          {activeSubTab === "banner" && (
+            <div className="space-y-6">
+              <div className="border-b border-gray-100 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h4 className="font-bold text-lg text-gray-950 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-[var(--primary)]" />
+                    Customize Home Hero Banners
+                  </h4>
+                  <p className="text-xs text-gray-550">Modify, upload, and update the interactive sliding background images & text shown on your store's homepage.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddBannerSlide}
+                  className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg text-xs font-bold hover:opacity-90 duration-150 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add New Slide
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveBanners} className="space-y-6">
+                <div className="grid grid-cols-1 gap-6">
+                  {cfgBanners.map((banner, index) => (
+                    <div key={banner.id} className="p-6 bg-white rounded-2xl border border-gray-150 shadow-xs relative space-y-4">
+                      {/* Upper Header Control Row */}
+                      <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded-full bg-gray-100 border text-[10px] font-bold font-mono flex items-center justify-center text-gray-600">
+                            {index + 1}
+                          </span>
+                          <span className="text-[11px] font-bold tracking-wider font-mono text-gray-450 uppercase">Slide Config</span>
+                        </div>
+                        {cfgBanners.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveBannerSlide(index)}
+                            className="p-1 px-3 bg-red-50 text-red-650 hover:bg-red-100 duration-200 text-[10px] font-bold rounded flex items-center gap-1.5 cursor-pointer"
+                            title="Delete Slide"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                            Remove Slide
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Slide Customizer Content: Inputs & Preview */}
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Inputs Left (7 Cols) */}
+                        <div className="lg:col-span-7 space-y-4">
+                          <div>
+                            <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Slide Title (Primary Heading) *</label>
+                            <input
+                              type="text"
+                              required
+                              value={banner.title}
+                              onChange={(e) => handleUpdateBannerProperty(index, "title", e.target.value)}
+                              placeholder="e.g. PREMIUM WINTER LAUNCH"
+                              className="w-full p-2.5 border bg-gray-50/50 rounded-lg text-xs font-bold text-gray-900 focus:bg-white focus:border-[var(--primary)] outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Slide Subtitle (Description Caption)</label>
+                            <textarea
+                              value={banner.subtitle}
+                              onChange={(e) => handleUpdateBannerProperty(index, "subtitle", e.target.value)}
+                              placeholder="e.g. Elegant styles customized with love..."
+                              rows={2.5}
+                              className="w-full p-2.5 border bg-gray-50/50 rounded-lg text-xs text-gray-800 focus:bg-white focus:border-[var(--primary)] outline-none resize-none"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Redirection Link / Hash</label>
+                              <input
+                                type="text"
+                                value={banner.link}
+                                onChange={(e) => handleUpdateBannerProperty(index, "link", e.target.value)}
+                                placeholder="e.g. #shop, #category/Shirts"
+                                className="w-full p-2.5 border bg-gray-50/50 rounded-lg text-xs font-mono focus:bg-white focus:border-[var(--primary)] outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Upload Photo</label>
+                              <input
+                                type="file"
+                                onChange={(e) => handleBannerPhotoUpload(index, e)}
+                                className="text-[11px] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:bg-gray-100 file:border-0 file:text-[10px] file:font-bold file:cursor-pointer w-full mt-1.5"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-1">Or Paste Direct Image Address / URL</label>
+                            <input
+                              type="text"
+                              value={banner.imageUrl}
+                              onChange={(e) => handleUpdateBannerProperty(index, "imageUrl", e.target.value)}
+                              placeholder="https://images.unsplash.com/photo-..."
+                              className="w-full p-2.5 border bg-gray-50/50 rounded-lg text-[11px] font-mono focus:bg-white focus:border-[var(--primary)] outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Mini Overlay Preview Right (5 Cols) */}
+                        <div className="lg:col-span-5 flex flex-col justify-between">
+                          <span className="block text-[10px] font-mono text-gray-500 font-bold uppercase mb-2 flex items-center gap-1.5">
+                            <Eye className="w-4 h-4 text-gray-400" />
+                            Live Miniature Carousel Preview
+                          </span>
+                          <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-950 border shadow-xs flex items-center justify-center p-4">
+                            {banner.imageUrl ? (
+                              <img
+                                src={banner.imageUrl}
+                                alt={banner.title}
+                                referrerPolicy="no-referrer"
+                                className="absolute inset-0 w-full h-full object-cover opacity-75"
+                              />
+                            ) : (
+                              <span className="text-white/30 text-[10px] font-mono font-bold">No photo added yet</span>
+                            )}
+                            
+                            {/* Dark filter overlay */}
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent p-4 flex flex-col justify-end text-left min-h-[75%]">
+                              <h6 className="text-xs font-black tracking-tight text-white uppercase truncate line-clamp-1">
+                                {banner.title || "UNTITLED LAUNCH"}
+                              </h6>
+                              <p className="text-[9px] text-white/80 leading-snug mt-0.5 line-clamp-2">
+                                {banner.subtitle || "Customize this slide subtitle caption..."}
+                              </p>
+                              {banner.link && (
+                                <span className="mt-2 text-[7px] font-bold uppercase tracking-wider text-amber-400 self-start border border-amber-400/30 px-1 py-0.5 rounded">
+                                  Link Target: {banner.link}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end pt-4 border-t border-gray-150">
+                  <button
+                    type="submit"
+                    className="px-8 py-3 bg-[var(--primary)] text-white text-xs font-black uppercase tracking-wider rounded-xl hover:opacity-95 duration-200 cursor-pointer shadow-md flex items-center gap-2 animate-bounce hover:animate-none"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Save Hero Banner Configurations
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
