@@ -18,9 +18,16 @@ export function getApiUrl(path: string): string {
 
   if (isExternalStatic) {
     const metaCast = import.meta as any;
-    const envApiUrl = (metaCast && metaCast.env && metaCast.env.VITE_API_BASE_URL) || "";
-    const savedApiUrl = localStorage.getItem("khalab_api_base") || "";
+    let envApiUrl = ((metaCast && metaCast.env && metaCast.env.VITE_API_BASE_URL) || "").trim();
+    let savedApiUrl = (localStorage.getItem("khalab_api_base") || "").trim();
     const defaultCloudRunUrl = "https://ais-pre-mlblprmea5x27qr4ihex5e-983253631521.asia-southeast1.run.app";
+    
+    if (savedApiUrl === "null" || savedApiUrl === "undefined" || !savedApiUrl.startsWith("http")) {
+      savedApiUrl = "";
+    }
+    if (envApiUrl === "null" || envApiUrl === "undefined" || !envApiUrl.startsWith("http")) {
+      envApiUrl = "";
+    }
     
     const finalBase = (envApiUrl || savedApiUrl || defaultCloudRunUrl).replace(/\/$/, "");
     return `${finalBase}${path}`;

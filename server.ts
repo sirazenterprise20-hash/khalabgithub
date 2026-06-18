@@ -8,14 +8,29 @@ import { Product, Category, Catalog, Review, Order, AppConfig, PushNotification 
 const app = express();
 const PORT = 3000;
 
-// Enable robust CORS support for all endpoints
+// Enable robust CORS support for all endpoints and preflight requests
 app.use(cors({
-  origin: "*",
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
-  allowedHeaders: "Content-Type,Authorization,X-Requested-With,Accept,Origin",
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  optionsSuccessStatus: 200
 }));
+
+// Manual OPTIONS preflight handler fallback for absolute reliability
+app.options("*", (req, res) => {
+  const origin = req.headers.origin || "*";
+  if (origin !== "*") {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept, Origin");
+  res.setHeader("Access-Control-Max-Age", "86400"); // cache preflight for 24 hours
+  res.sendStatus(200);
+});
 
 // High payload size for base64 photo/video uploads
 app.use(express.json({ limit: "50mb" }));
