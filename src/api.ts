@@ -1,6 +1,6 @@
 // Robust API routing utility supporting local Cloud Run containers and static hosting proxies (like Netlify)
 export function getApiUrl(path: string): string {
-  if (!path.startsWith("/api/")) {
+  if (!path.startsWith("/api/") && !path.startsWith("/uploads/")) {
     return path;
   }
 

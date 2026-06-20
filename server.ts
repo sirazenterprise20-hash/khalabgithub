@@ -40,6 +40,32 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
+// Intercept JSON responses and rewrite relative "/uploads/" paths to absolute URLs (so sites on Netlify display uploaded photos)
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = function (body) {
+    if (body) {
+      try {
+        let str = JSON.stringify(body);
+        let proto = req.headers["x-forwarded-proto"] || req.protocol;
+        if (typeof proto === "string") {
+          proto = proto.split(",")[0].trim();
+        }
+        const protocol = (proto === "http" || proto === "https") ? proto : "https";
+        const host = req.get("host");
+        const baseUrl = `${protocol}://${host}`;
+        // Regex to match relative "/uploads/" and replace with "baseUrl/uploads/"
+        str = str.replace(/"\/uploads\//g, `"${baseUrl}/uploads/`);
+        body = JSON.parse(str);
+      } catch (e) {
+        // Fallback to original body in case of any serialization error
+      }
+    }
+    return originalJson.call(this, body);
+  };
+  next();
+});
+
 // High payload size for base64 photo/video uploads
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
