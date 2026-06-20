@@ -1,3 +1,5 @@
+import { handleFirebaseMockFetch } from "./firebase";
+
 // Robust API routing utility supporting local Cloud Run containers and static hosting proxies (like Netlify)
 export function getApiUrl(path: string): string {
   if (!path.startsWith("/api/") && !path.startsWith("/uploads/")) {
@@ -55,7 +57,6 @@ export async function apiFetch(input: string, init?: RequestInit): Promise<Respo
 
   // On Netlify or any static host, run completely, securely and directly on Firebase client-side database
   if (isExternalStatic) {
-    const { handleFirebaseMockFetch } = await import("./firebase");
     return handleFirebaseMockFetch(input, init);
   }
 
@@ -67,12 +68,8 @@ export async function apiFetch(input: string, init?: RequestInit): Promise<Respo
   const method = (init?.method || "GET").toUpperCase();
   if (response.ok && (method === "POST" || method === "PUT" || method === "DELETE")) {
     try {
-      import("./firebase").then(({ handleFirebaseMockFetch }) => {
-        handleFirebaseMockFetch(input, init).catch(e => {
-          console.warn("Silent background Firestore sync failed:", e);
-        });
-      }).catch(e => {
-        console.warn("Silent background dynamic import failed:", e);
+      handleFirebaseMockFetch(input, init).catch(e => {
+        console.warn("Silent background Firestore sync failed:", e);
       });
     } catch (e) {
       console.warn("Silent background Firestore sync trigger failed:", e);
