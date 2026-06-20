@@ -1,3 +1,5 @@
+import { handleFirebaseMockFetch } from "./firebase";
+
 // Robust API routing utility supporting local Cloud Run containers and static hosting proxies (like Netlify)
 export function getApiUrl(path: string): string {
   if (!path.startsWith("/api/") && !path.startsWith("/uploads/")) {
@@ -46,7 +48,33 @@ export function getImgUrl(path?: string): string {
   return getApiUrl(normalizedPath);
 }
 
-export function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+export async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+  const isCloudRun = hostname.includes(".run.app");
+  const isExternalStatic = !isCloudRun && (!isLocal || (isLocal && port !== "3000"));
+
+  // On Netlify or any static host, run completely, securely and directly on Firebase client-side database
+  if (isExternalStatic) {
+    return handleFirebaseMockFetch(input, init);
+  }
+
+  // Otherwise, run on the custom Node server (local development or container)
   const targetUrl = getApiUrl(input);
-  return fetch(targetUrl, init);
+  const response = await fetch(targetUrl, init);
+
+  // Auto-sync write commands (POST, PUT, DELETE) dynamically directly to Firestore too so everything matches!
+  const method = (init?.method || "GET").toUpperCase();
+  if (response.ok && (method === "POST" || method === "PUT" || method === "DELETE")) {
+    try {
+      handleFirebaseMockFetch(input, init).catch(e => {
+        console.warn("Silent background Firestore sync failed:", e);
+      });
+    } catch (e) {
+      console.warn("Silent background Firestore sync trigger failed:", e);
+    }
+  }
+
+  return response;
 }
