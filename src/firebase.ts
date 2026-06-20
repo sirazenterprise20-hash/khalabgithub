@@ -49,12 +49,12 @@ function getEnvValue(key: string): string | undefined {
 
 // The Web App's Firebase configuration provided by the user
 const firebaseConfig = {
-  apiKey: getEnvValue("FIREBASE_API_KEY") || "AIzaSyAUKXbdTbx138JmZUk1oR34Lt9vkabm7YI",
-  authDomain: getEnvValue("FIREBASE_AUTH_DOMAIN") || "testkhalab.firebaseapp.com",
-  projectId: getEnvValue("FIREBASE_PROJECT_ID") || "testkhalab",
-  storageBucket: getEnvValue("FIREBASE_STORAGE_BUCKET") || "testkhalab.firebasestorage.app",
-  messagingSenderId: getEnvValue("FIREBASE_MESSAGING_SENDER_ID") || "779766922472",
-  appId: getEnvValue("FIREBASE_APP_ID") || "1:779766922472:web:8622d61456a404ba375d5d"
+  apiKey: getEnvValue("FIREBASE_API_KEY") || "AIzaSyAA4eA71_D84PubK7XMh-QJtT69-O4Glok",
+  authDomain: getEnvValue("FIREBASE_AUTH_DOMAIN") || "khalabweb-4117f.firebaseapp.com",
+  projectId: getEnvValue("FIREBASE_PROJECT_ID") || "khalabweb-4117f",
+  storageBucket: getEnvValue("FIREBASE_STORAGE_BUCKET") || "khalabweb-4117f.firebasestorage.app",
+  messagingSenderId: getEnvValue("FIREBASE_MESSAGING_SENDER_ID") || "806560423240",
+  appId: getEnvValue("FIREBASE_APP_ID") || "1:806560423240:web:e4ca88b0e21851b30c277d"
 };
 
 // Initialize Firebase

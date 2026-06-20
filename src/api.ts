@@ -11,10 +11,11 @@ export function getApiUrl(path: string): string {
   const hostname = window.location.hostname;
   const port = window.location.port;
   
-  // Check if we are running on an external static hosting environment
-  const isExternalStatic = hostname.includes("netlify.app") || 
-                           hostname.includes("github.io") || 
-                           (hostname === "localhost" && port !== "3000");
+  // Check if we are running on an external static hosting environment (e.g., Netlify with subdomain or custom domain, Vercel, etc.)
+  const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+  const isCloudRun = hostname.includes(".run.app");
+  
+  const isExternalStatic = !isCloudRun && (!isLocal || (isLocal && port !== "3000"));
 
   if (isExternalStatic) {
     const metaCast = import.meta as any;
