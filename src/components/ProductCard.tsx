@@ -1,5 +1,6 @@
 import { Star, Video, Eye } from "lucide-react";
 import { Product } from "../types";
+import { getImgUrl } from "../api";
 
 interface ProductCardProps {
   product: Product;
@@ -21,7 +22,7 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
       <div className="aspect-[4/5] bg-slate-100 rounded-lg overflow-hidden relative">
         {product.images[0] ? (
           <img
-            src={product.images[0]}
+            src={getImgUrl(product.images[0])}
             alt={product.title}
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"

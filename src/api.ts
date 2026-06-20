@@ -36,6 +36,15 @@ export function getApiUrl(path: string): string {
   return path;
 }
 
+export function getImgUrl(path?: string): string {
+  if (!path) return "/uploads/placeholder.png";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return getApiUrl(normalizedPath);
+}
+
 export function apiFetch(input: string, init?: RequestInit): Promise<Response> {
   const targetUrl = getApiUrl(input);
   return fetch(targetUrl, init);

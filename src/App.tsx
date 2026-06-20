@@ -22,7 +22,7 @@ import {
   Copy
 } from "lucide-react";
 import { Product, Category, Catalog, Order, AppConfig, PushNotification } from "./types";
-import { apiFetch } from "./api";
+import { apiFetch, getImgUrl } from "./api";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminDashboard from "./components/AdminDashboard";
@@ -309,7 +309,7 @@ export default function App() {
             {config.banners && config.banners.length > 0 ? (
               <div className="relative w-full aspect-21/9 sm:aspect-16/6 bg-gray-900 border-b overflow-hidden shadow-xs">
                 <img
-                  src={config.banners[currBannerIndex].imageUrl}
+                  src={getImgUrl(config.banners[currBannerIndex].imageUrl)}
                   alt={config.banners[currBannerIndex].title}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover opacity-85 transition-all duration-700"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Star, MessageSquare, Video, ArrowLeft, ShoppingCart, User, PlusCircle, Check, Info } from "lucide-react";
 import { Product, Review } from "../types";
-import { apiFetch } from "../api";
+import { apiFetch, getImgUrl } from "../api";
 import ProductCard from "./ProductCard";
 
 interface ProductDetailProps {
@@ -138,7 +138,7 @@ export default function ProductDetail({
           <div className="relative aspect-2/3 bg-gray-50 border border-gray-150 rounded-2xl overflow-hidden shadow-xs">
             {product.images[0] ? (
               <img
-                src={product.images[0]}
+                src={getImgUrl(product.images[0])}
                 alt={product.title}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"

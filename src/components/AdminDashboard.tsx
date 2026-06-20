@@ -22,7 +22,7 @@ import {
   Globe
 } from "lucide-react";
 import { Product, Category, Catalog, Order, AppConfig, Promo, Banner } from "../types";
-import { apiFetch } from "../api";
+import { apiFetch, getImgUrl } from "../api";
 
 interface AdminDashboardProps {
   config: AppConfig;
@@ -966,7 +966,7 @@ export default function AdminDashboard({
                               <td className="p-3.5 flex items-center gap-3">
                                 {p.images[0] ? (
                                   <img
-                                    src={p.images[0]}
+                                    src={getImgUrl(p.images[0])}
                                     alt=""
                                     referrerPolicy="no-referrer"
                                     className="w-10 h-12 object-cover rounded-md bg-gray-100 shrink-0"
@@ -1976,7 +1976,7 @@ export default function AdminDashboard({
                           <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-950 border shadow-xs flex items-center justify-center p-4">
                             {banner.imageUrl ? (
                               <img
-                                src={banner.imageUrl}
+                                src={getImgUrl(banner.imageUrl)}
                                 alt={banner.title}
                                 referrerPolicy="no-referrer"
                                 className="absolute inset-0 w-full h-full object-cover opacity-75"

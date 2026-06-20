@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ShoppingBag, Search, Phone, Send, Info, Bell, Shield, User } from "lucide-react";
 import { AppConfig, PushNotification } from "../types";
+import { getImgUrl } from "../api";
 
 interface HeaderProps {
   config: AppConfig;
@@ -60,7 +61,7 @@ export default function Header({
         >
           {config.logoUrl ? (
             <img
-              src={config.logoUrl || "/uploads/placeholder.png"}
+              src={getImgUrl(config.logoUrl)}
               alt={config.brandName}
               referrerPolicy="no-referrer"
               className="h-9 sm:h-11 object-contain"
